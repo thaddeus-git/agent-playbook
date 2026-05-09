@@ -139,10 +139,24 @@ Claude drafts the ADR. The operator approves it. After approval, Claude updates 
 | **Subagent prompt** | Claude | Runtime — how the agent behaves when invoked. | `.claude/agents/<name>.md` |
 | **Skill** | Claude | Runtime — how a specific transform is performed. | `.claude/skills/<name>/SKILL.md` |
 | **CLI tool** | Claude | Runtime — deterministic scripts. | `bin/`, `scripts/`, or `src/` |
+| **CLI tools index** | Claude | Mirror of every CLI's purpose + side-effect class. Quick scan; not authoritative. | `docs/cli-tools.md` |
+
+**CLI side-effect classes.** Every CLI in the index is one of:
+
+- `local` — DB writes or read-only network. No third-party state changes.
+- `external` — irreversible write to a real third party (mailbox, CRM, customer-facing sheet, paid ad, posted content).
+
+The `external` class is the operational "needs human gate" signal. Mirror it in three places:
+
+1. The CLI's own behavior (`external` commands should not auto-fire — require an explicit flag or pre-existing approval row).
+2. The agent's `side_effects:` frontmatter.
+3. The LikeC4 `#side-effect-external` tag on the relationship to the external system.
+
+The index is a quick scan; the **canon is the LikeC4 tag + frontmatter**. If they disagree, fix the index.
 
 **Authority order** when sources disagree: see `docs/AUTHORITY-ORDER.md` in your project. The general rule: *runtime* (`.claude/`, `src/`) > *structure* (LikeC4) > *decision* (ADR) > *runbook* (how-to) > *external reference*.
 
-**Intake is not in the authority order.** Once the ADR + LikeC4 + code exist, those are canonical and the intake becomes historical context. If the design needs to change, **write a new ADR — do not edit the original intake to match what was built.**
+**Intake and cli-tools.md are not in the authority order.** Intakes are historical once built (write a new ADR if design changes). The cli-tools.md index mirrors LikeC4 + frontmatter, which are canonical. If they disagree, fix the index — never the other way around.
 
 ---
 
