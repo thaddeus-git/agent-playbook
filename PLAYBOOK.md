@@ -170,6 +170,21 @@ Diagrams are useful for two things: (a) Claude reads them to stay consistent, (b
 
 **Editor**: install the official **LikeC4 VSCode extension** for inline preview, validation, jump-to-definition, and safe rename. Full CLI reference: <https://likec4.dev/tooling/cli/>.
 
+**Project script convention.** Every project with LikeC4 should expose these npm scripts so the daily commands are short, discoverable (`npm run`), and identical across projects:
+
+```json
+{
+  "scripts": {
+    "arch:preview": "likec4 dev",
+    "arch:validate": "likec4 validate",
+    "arch:export-png": "likec4 export png -o docs/architecture/likec4/exports"
+  },
+  "devDependencies": { "likec4": "^1" }
+}
+```
+
+After `npm install`, daily use is `npm run arch:preview` / `npm run arch:validate`. CI runs `npm run arch:validate` as a blocker.
+
 ### 5.2 Workflow diagrams — Mermaid in markdown
 
 **Use for**: "How does this specific agent step through its work? Where does it branch?"
@@ -198,17 +213,31 @@ flowchart TD
 **Use for**: "I'm working out an idea before I'm ready to commit to it."
 
 - draw.io, paper, whiteboard photo, iPad, napkin. Whatever lets you think.
-- **Throwaway.** Do not commit brainstorming sketches to the repo.
-- Workflow:
-  1. Sketch on whatever
-  2. Hand the image (or draw.io export) to Claude with a clear instruction
-  3. Claude translates into Mermaid (in the intake) and/or LikeC4 (in model.c4)
-  4. Operator reviews the rendered output, not the source
-  5. Sketch is deleted or archived outside the repo
+- **Throwaway.** Brainstorming sketches must never end up in the repo's canonical doc tree (`docs/`). They're not maintained and they will rot.
 
-Example handoff message to Claude:
+**The `scratch/` convention.** Every project should have a top-level `scratch/` directory, **gitignored**. This is where rough sketches, screenshots, and half-baked notes live while they're still in flux.
 
-> *"This is the workflow I have in mind for the research agent. Please update `docs/intake/0001-research-agent.md` section 3 with a Mermaid version. If this changes the structural model, update `docs/architecture/likec4/model.c4` accordingly. Tell me which files changed."*
+```
+my-project/
+├── scratch/               ← gitignored. drawio, png, .md drafts.
+├── docs/                  ← canonical. intake / adr / likec4 / playbook.
+└── ...
+```
+
+Why a project-local folder rather than "anywhere on your disk":
+
+- Claude Code can read files in `scratch/` when you reference them (e.g., `@scratch/idea.png`).
+- It's right next to the project, not lost in `~/Downloads/`.
+- The gitignore guarantee means you can't accidentally commit a half-thought.
+
+**Workflow** (the human-Claude round trip):
+
+1. Sketch on whatever feels fastest. Drop the file (or screenshot) into `scratch/`.
+2. Hand the path to Claude with explicit destination instructions:
+   > *"Look at `scratch/research-flow.png`. Update `docs/intake/0001-research-agent.md` section 3 with a Mermaid version. If this changes the structural model, update `docs/architecture/likec4/model.c4`. Tell me which files changed."*
+3. Claude translates the sketch into Mermaid (in the intake) and/or LikeC4 (in `model.c4`).
+4. Operator reviews the rendered output (markdown preview, `npm run arch:preview`), not the source.
+5. Once the idea has a real intake, **the scratch sketch is no longer canonical** — delete it from `scratch/` or leave it as historical noise. Don't try to keep it in sync with the intake.
 
 ### 5.4 What we don't draw
 
