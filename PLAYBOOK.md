@@ -185,6 +185,22 @@ Diagrams are useful for two things: (a) Claude reads them to stay consistent, (b
 
 After `npm install`, daily use is `npm run arch:preview` / `npm run arch:validate`. CI runs `npm run arch:validate` as a blocker.
 
+**Element-kind conventions.** The template's `specification.c4` declares these kinds; use them consistently across projects:
+
+| Kind | Shape | Use for |
+|---|---|---|
+| `actor` | person (dark blue) | Humans outside the system — operators, support teams |
+| `agent` | person (sky blue) | LLM-driven worker inside the system — has judgment, scoped tools |
+| `component` | rectangle | Deterministic process — no LLM call in the inner loop |
+| `skill` | browser | Pure transform — never has side effects |
+| `gate` | rectangle (amber) | Fail-closed check — pair with a `blocked` terminal for the failed branch |
+| `datastore` | cylinder | Pipeline DB — actors do not connect directly; route through a CLI or component |
+| `externalSystem` | rectangle (muted) | Anything outside the system boundary |
+
+The `actor`/`agent` split is intentional. Both render as person because both have judgment. `actor` is *outside* the system boundary (a real human) and `agent` is *inside* (something we built). The visual similarity captures the conceptual one; spatial position in the diagram tells you which is which.
+
+Layout direction (`autoLayout TopBottom` vs `LeftRight` etc.) is per-diagram aesthetics, not a project convention. Pick whichever reads better for that specific view; revisit when the model changes shape.
+
 ### 5.2 Workflow diagrams — Mermaid in markdown
 
 **Use for**: "How does this specific agent step through its work? Where does it branch?"
