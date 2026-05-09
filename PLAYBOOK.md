@@ -20,6 +20,19 @@ Before designing an agent, ask: **does this actually need an LLM in the loop?** 
 
 The default answer to "should we add another agent / skill / tool" is **no**. Reverse the default only when you can name a concrete failure of the current setup.
 
+**Workflow vs agent — concrete test.** When you can describe the work, ask:
+
+> "Can I write down every step of the orchestration **without saying 'depends on what the LLM decides'**?"
+
+- **Yes** → it's a *workflow*. LLM is used inside steps (each prompt is an LLM call) but the sequence and transitions are deterministic code. Build as a **CLI script** (`bin/<name>`) — simpler, cheaper, more predictable than a subagent.
+- **No** → it's an *agent*. The LLM dynamically decides what to do next based on intermediate results. Build as `.claude/agents/<name>.md`.
+
+Default to workflow. Reach for agent only when judgment-in-loop is genuinely required.
+
+**Naming discipline.** Don't call something "<X> agent" until the test above passes. Casual labels lock in design assumptions — "Research Agent" sounds natural but commits you to subagent overhead before you've checked you need it. Use "<X> workflow" / "<X> pipeline" / "<X> CLI" / just "<X>" for deterministic things; reserve "agent" for confirmed LLM-in-loop work.
+
+Most needs are workflows. Anthropic names five standard workflow patterns (prompt chaining, routing, parallelization, orchestrator-workers, evaluator-optimizer) — see *[Building Effective Agents](https://www.anthropic.com/research/building-effective-agents)*.
+
 ### 1.2 Operator-readable artifacts
 
 The operator (the human owning the project) must be able to verify direction without reading code or DSL. That means every design decision lands in **plain-English artifacts** before it lands in code:
