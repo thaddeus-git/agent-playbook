@@ -330,6 +330,34 @@ The standard way to bring an idea into the repo:
 4. **Iterate** — push back, refine, until the rendered version matches your mental model
 5. **Discard** the sketch — the repo artifacts are now canonical
 
+### 6.5 Chat lifecycle — one chat per phase
+
+Each phase of the design recipe produces one committed artifact and lives in **one** Claude Code chat. When the phase is done, that chat closes; the next phase opens a fresh one.
+
+| Phase | Chat owns end-to-end | Done when |
+|---|---|---|
+| **Intake** | drafting intake §§1–5 + committing + opening PR | Operator approves intake; PR open |
+| **ADR** | drafting ADR + committing + opening PR | Status: Accepted; PR open; intake flipped to Approved in same PR |
+| **Implementation** | LikeC4 update + CLI(s) / agent / skill + cli-tools.md row + tests | Tests pass; PR open |
+
+**Each chat closes itself out** — flips statuses, commits, opens its PR, then stops. The operator does not need a separate "coach chat" to bridge phases. The next phase opens a fresh chat at the project root (not inside a worktree), starting from the merged PR's main.
+
+**Why one chat per phase:**
+
+- Each chat's context stays focused on one decision surface — no bleed between "what to build" and "how to build it"
+- Going back is easy: each phase produces a committed artifact you can rerun the next phase against
+- Worktrees let phases run in parallel when feature work branches
+
+**Don't:**
+
+- **Combine multiple phases in one chat.** Intake + ADR mixes "what" with "why" too early; ADR + implementation creates premature optimisation pressure where the structure gets shaped to fit a code shortcut.
+- **Bring meta-coaching prompts into a phase chat.** The playbook IS the meta-coach. If you're unsure what to do next, re-read the relevant playbook section inside the phase chat — don't open a separate chat to "consult."
+- **Continue a phase chat after its PR is open.** Open a fresh chat for the next phase. Phase chats accumulate context that becomes irrelevant once the artifact ships.
+
+**Wrap-up prompt template** (paste into a phase chat once the operator approves the artifact):
+
+> *"[Artifact] approved. Per playbook §6.5, close this phase: flip the status field to Accepted/Approved, commit on a new feature branch, push, open a PR, then stop. Don't start the next phase."*
+
 ---
 
 ## 7. Update cadence
