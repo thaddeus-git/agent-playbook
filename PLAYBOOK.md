@@ -157,8 +157,18 @@ Diagrams are useful for two things: (a) Claude reads them to stay consistent, (b
 - One file: `docs/architecture/likec4/model.c4` (plus `views.c4` and `specification.c4`).
 - **Whole-system scope**, not per-feature. There is exactly one model.c4 per project.
 - Auto-loaded into every Claude session via `@imports` in CLAUDE.md.
-- **Claude maintains the DSL.** The operator looks at the rendered SVG via `npx likec4 dev` or the LikeC4 VSCode extension.
-- Validate before committing: `npx likec4 validate`.
+- **Claude maintains the DSL.** The operator looks at the rendered SVG, not the source.
+
+**Daily commands** (Node 20+):
+
+| Command | Use |
+|---|---|
+| `npx likec4 dev` | Local web preview, hot-reloads as you edit. The operator's primary way to look at the model. |
+| `npx likec4 validate` | Syntax + layout drift. Run before every commit; treat errors as blockers. |
+| `npx likec4 export png -o ./assets` | Export views as PNG for sharing in PRs / docs. |
+| `npx likec4 export drawio` | Reverse export to draw.io (rare — only if you're going back to brainstorm). |
+
+**Editor**: install the official **LikeC4 VSCode extension** for inline preview, validation, jump-to-definition, and safe rename. Full CLI reference: <https://likec4.dev/tooling/cli/>.
 
 ### 5.2 Workflow diagrams — Mermaid in markdown
 
