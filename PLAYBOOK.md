@@ -140,6 +140,38 @@ Claude drafts the ADR. The operator approves it. After approval, Claude updates 
 
 ---
 
+## 3.5 When the design space is unclear — spike before intake
+
+The 4-step recipe assumes you already know enough to write a one-sentence napkin flow. Sometimes you don't — you have a rough hunch but can't yet describe the inputs, outputs, or steps. Forcing a premature intake produces fiction; forcing premature code produces brittle commitments.
+
+The right move is a **spike** — a deliberately throwaway implementation that exists to teach you what the design should be. After the spike, you write the intake informed by what you learned, then implement properly.
+
+**Spike rules:**
+
+1. **Time-box it** (1 day max). A spike that runs longer is no longer exploring — it's quietly becoming the implementation.
+2. **The spike code is not the final implementation.** Live in `scratch/` (gitignored) or a `spike/` branch — never in `bin/`, `src/`, or `.claude/`. When you finish learning, throw the spike away.
+3. **Write the intake informed by the spike.** The whole point: turn rough hunch into napkin flow + tools list + happy/failure path. Then run the standard 4-step recipe.
+4. **Don't skip intake "because the spike already works."** A working spike still has untested assumptions, undocumented decisions, and no architecture. Promoting it directly to production trades short-term speed for long-term debt.
+
+**When to spike:**
+
+| Situation | Spike? |
+|---|---|
+| You can write a one-sentence napkin flow → ✅ go straight to intake | No |
+| You know what the agent should *output*, not how it gets there → maybe spike one path | Maybe |
+| You have a rough idea but no clue about the shape of inputs/outputs → ✅ spike | Yes |
+| You already wrote intake + ADR for this feature | No — design phase is over |
+
+**Spike at smaller granularities, too.** Anthropic's evaluation-driven approach to skills is the same idea applied to *individual prompts*: don't pre-design skills, observe Claude on real tasks, and **extract a skill once you see the same prompt pattern reused 3+ times**. Quoting [*Equipping agents for the real world with Agent Skills*](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills):
+
+> "Start with evaluation: identify specific gaps in your agents' capabilities by running them on representative tasks and observing where they struggle... This process will help you discover what context Claude actually needs, instead of trying to anticipate it upfront."
+
+The same applies to schema design: start with the minimum (one JSON column over four typed columns), let real query patterns reveal what needs to be promoted to indexed columns, migrate when needed.
+
+**Anti-pattern: spike-as-implementation.** Skipping intake because the spike works — see §8.
+
+---
+
 ## 4. Documentation map
 
 | Artifact | Author | Purpose | Lives at |
@@ -383,6 +415,7 @@ These are the failure modes we've seen and want to prevent.
 | Anti-pattern | What it looks like | Fix |
 |---|---|---|
 | **Mega-intake** | One intake covers 3 agents. Napkin flow is 4 sentences. | Split. One intake per agent. |
+| **Spike-as-implementation** | A throwaway exploration "works," so you skip writing the intake/ADR and ship it. | Stop. The spike has untested assumptions and undocumented decisions. Write the intake + ADR informed by what you learned, then implement properly (§3.5). |
 | **Pipeline-only napkin** | "Research agent: gives data to generator." Doesn't run in isolation. | Rewrite to describe what the agent *outputs*, not who consumes it. |
 | **Skipping irreversibles** | Tools list has only (R) marks because "we're not sending emails yet." | Mark *future* irreversibles too. The gate design happens before the irreversible action exists. |
 | **Happy-path-only design** | Section 3 has 5 steps, each with one bullet. | For each step, write at least 2 failure modes. If you can't think of any, you haven't thought hard enough. |
