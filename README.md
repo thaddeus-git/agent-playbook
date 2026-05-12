@@ -2,13 +2,31 @@
 
 Shared method for building Claude Code agents in our team.
 
-**Read [PLAYBOOK.md](PLAYBOOK.md) — that's the artifact.** This README only describes how to consume the playbook in a project.
+---
+
+## Operator quick start — for the daily user
+
+> **You don't need to read the playbook. Claude does.**
+
+Your daily workflow:
+
+1. Open Claude Code in the project root.
+2. Tell it what you want to build, in **one plain-English sentence**.
+3. It asks questions; you answer in plain English. If a question feels too technical, say *"I don't know — what would you recommend, and why?"*
+4. It shows you a draft; you review it. If it doesn't make sense, say *"explain it in plain English."*
+5. When it looks right, say *"approved, continue."* If not, say what's wrong.
+6. When it says *"phase done / PR open"* — you go to GitHub and merge.
+7. Open a fresh chat for the next phase.
+
+Stuck? Tell Claude *"based on the playbook, what should I do next?"* — it will read the relevant section and answer.
+
+That's the whole job. Everything below this section is for the person setting up a project, not for the daily operator.
 
 ---
 
 ## What's in here
 
-- **[PLAYBOOK.md](PLAYBOOK.md)** — the method itself. Sequenced steps, named artifacts, and the discipline that keeps work reviewable when one person designs and Claude implements.
+- **[PLAYBOOK.md](PLAYBOOK.md)** — the method itself. Sequenced steps, named artifacts, and the discipline that keeps work reviewable when one person designs and Claude implements. **Claude reads this every session. The operator does not need to read it.**
 
 That's it. One file. The playbook itself is the deliverable; everything else is plumbing.
 
