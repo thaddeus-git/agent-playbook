@@ -390,6 +390,52 @@ Each phase of the design recipe produces one committed artifact and lives in **o
 
 > *"[Artifact] approved. Per playbook §6.5, close this phase: flip the status field to Accepted/Approved, commit on a new feature branch, push, open a PR, then stop. Don't start the next phase."*
 
+### 6.6 Builder vs runtime — the CLAUDE.local.md pattern
+
+Claude Code auto-loads every CLAUDE.md it finds (project, user, managed, plus everything reached via `@imports`). That loading happens in **every** session — when you're designing an agent (builder mode) **and** when a subagent is invoked to do work (runtime mode).
+
+This creates a leak: the agent-building method (this playbook, decision logs, structural diagrams) is *build-time* documentation, but it ends up in the context of *runtime* subagents that don't need it. The result isn't catastrophic — context budgets absorb it — but it's conceptually wrong: an agent doing publishing work doesn't need to know how the agent was designed.
+
+The fix uses Anthropic's existing memory layering: see [Claude Code Memory](https://code.claude.com/docs/en/memory) for the official taxonomy.
+
+**Two-file split:**
+
+| File | Location | Committed? | Purpose | Loaded for |
+|---|---|---|---|---|
+| **`CLAUDE.md`** | Project root | ✅ Yes | Runtime context — project description, runtime invariants, file layout, key entities, external integrations | Everyone who clones the repo |
+| **`CLAUDE.local.md`** | Project root | ❌ Gitignored | Builder context — `@import` playbook, LikeC4 `@imports`, builder invariants, decision log | Only you (machines with this file present) |
+
+The split survives forks because `CLAUDE.local.md.example` is committed: `bootstrap.sh` copies it to `CLAUDE.local.md` on first run, idempotent.
+
+**Why use `CLAUDE.local.md` and not `~/.claude/CLAUDE.md`:**
+
+- `~/.claude/CLAUDE.md` loads in **every project on your machine** — putting one project's builder context there pollutes unrelated projects.
+- `CLAUDE.local.md` is **project-scoped + machine-scoped**: only loads when you're in *this* repo on *your* machine.
+
+**When the split actually matters:**
+
+- A teammate clones the repo and runs an agent — they don't see the playbook (their `CLAUDE.local.md` doesn't exist).
+- A production server runs subagents — same deal, no builder context pollution.
+- You set up a separate "production clone" of the repo for testing runtime behavior.
+
+For a solo operator running everything on one machine, the split is forward-looking: when one of the above scenarios shows up, no migration is needed.
+
+**What goes in each file:**
+
+| Content | CLAUDE.md (runtime) | CLAUDE.local.md (builder) |
+|---|---|---|
+| `@import` playbook | | ✅ |
+| `@imports` for LikeC4 spec/model/views | | ✅ |
+| LikeC4-canon invariant ("don't autonomously edit") | | ✅ |
+| Decision log (ADR summaries) | | ✅ |
+| `npx likec4 validate` reminder | | ✅ |
+| Project description + entities + external integrations | ✅ | |
+| AUTHORITY-ORDER reference | ✅ | |
+| Project layout (`.claude/agents/`, `bin/`, etc.) | ✅ | |
+| Project runtime invariants (e.g., "publishing irreversible") | ✅ | |
+
+When in doubt: would a subagent doing its job care? If yes, runtime. If no, builder.
+
 ---
 
 ## 7. Update cadence
